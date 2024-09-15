@@ -22,12 +22,12 @@ export class Tamagotchi {
   @JoinColumn({ name: 'health_id' })
   health_id: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   nickname: string;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', nullable: false })
   happiness: number;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'date', nullable: false })
   created_at: Date;
 }

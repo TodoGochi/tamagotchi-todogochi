@@ -5,6 +5,6 @@ export class Level {
   @PrimaryGeneratedColumn()
   level_id: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', nullable: false })
   level: number;
 }
