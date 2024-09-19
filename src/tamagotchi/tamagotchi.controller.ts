@@ -44,6 +44,11 @@ export class TamagotchiController {
     return this.tamagotchiService.cure(userId);
   }
 
+  @Post('resurrect')
+  async resurrect(@Body('userId') userId: number) {
+    return this.tamagotchiService.resurrect(userId);
+  }
+
   // @Post('play')
   // @UseInterceptors(TamagotchiStatusInterceptor)
   // async play(@Body('userId') userId: number) {

@@ -17,7 +17,7 @@ export class TamagotchiService {
     private readonly dataSource: DataSource,
   ) {}
 
-  @Interval(3600000) // 1시간 = 3600000 밀리초
+  @Interval(2000) // 1시간 = 3600000 밀리초
   async updateTamagotchiStatus(): Promise<void> {
     // 모든 Tamagotchi 가져오기
     const tamagotchis = await this.tamagotchiRepository.find();
@@ -46,7 +46,8 @@ export class TamagotchiService {
       if (updatedHealthStatus === HealthStatus.SICK && updatedSickAt) {
         const currentTime = new Date();
         const hoursDifference =
-          (currentTime.getTime() - updatedSickAt.getTime()) / (1000 * 60 * 60);
+          // (currentTime.getTime() - updatedSickAt.getTime()) / (1000 * 60 * 60);
+          currentTime.getTime() - updatedSickAt.getTime();
 
         if (hoursDifference >= 10) {
           updatedHealthStatus = HealthStatus.DEAD;
@@ -210,6 +211,54 @@ export class TamagotchiService {
         sick_at: tamagotchi.sick_at,
         happiness: tamagotchi.happiness,
         hunger: tamagotchi.hunger,
+      },
+    );
+
+    return tamagotchi;
+  }
+
+  async resurrect(userId: number): Promise<Tamagotchi> {
+    const tamagotchi = await this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    // 현재 상태가 "Dead"인지 확인
+    if (tamagotchi.health_status !== HealthStatus.DEAD) {
+      throw new ApiError('TAMAGOTCHI-0005'); // Tamagotchi가 Dead 상태가 아닐 때의 에러 처리
+    }
+
+    // Experience 엔티티 가져오기
+    const experience = await this.experienceRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    // 부활 진행: health_status를 "HEALTHY"로 변경, happiness와 hunger를 10으로 설정
+    tamagotchi.health_status = HealthStatus.HEALTHY;
+    tamagotchi.happiness = 10;
+    tamagotchi.hunger = 10;
+
+    // Experience의 모든 속성을 0으로 초기화
+    experience.feed = 0;
+    experience.play = 0;
+    experience.pet = 0;
+
+    // Tamagotchi와 Experience 업데이트
+    await this.tamagotchiRepository.update(
+      { user_id: userId },
+      {
+        health_status: tamagotchi.health_status,
+        happiness: tamagotchi.happiness,
+        hunger: tamagotchi.hunger,
+        sick_at: null, // 부활 시 sick_at을 null로 초기화
+      },
+    );
+
+    await this.experienceRepository.update(
+      { user_id: userId },
+      {
+        feed: experience.feed,
+        play: experience.play,
+        pet: experience.pet,
       },
     );
 

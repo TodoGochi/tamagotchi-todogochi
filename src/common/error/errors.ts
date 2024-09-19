@@ -31,4 +31,9 @@ export const ERRORS = {
     message: 'Tamagotchi can not be cured',
     statusCode: HttpStatusCode.Forbidden,
   },
+  'TAMAGOTCHI-0005': {
+    errorCode: 'TAMAGOTCHI-0005',
+    message: 'Tamagotchi is not dead',
+    statusCode: HttpStatusCode.Forbidden,
+  },
 };
