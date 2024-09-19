@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ApiError } from 'src/common/error/api.error';
 import { Interval } from '@nestjs/schedule';
 import { HealthStatusType as HealthStatus } from 'src/tamagotchi/constant/health-status.enum';
+import { LevelType } from './constant/level.enum';
 
 @Injectable()
 export class TamagotchiService {
@@ -63,6 +64,55 @@ export class TamagotchiService {
           health_status: updatedHealthStatus,
           sick_at: updatedSickAt,
         },
+      );
+    }
+  }
+
+  getNextLevel(tamagotchi: Tamagotchi): LevelType {
+    const currentLevel = tamagotchi.level;
+
+    // 1레벨에서 2레벨로: 생성 후 2일이 지나면 자동 업그레이드
+    if (currentLevel === LevelType.EGG) {
+      const currentTime = new Date();
+      const createdAt = new Date(tamagotchi.created_at);
+      const daysDifference =
+        (currentTime.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+
+      if (daysDifference >= 2) {
+        return LevelType.YOUTH;
+      }
+    }
+
+    // 2레벨에서 3레벨로: 행동이 각각 10번 이상일 때 업그레이드
+    if (currentLevel === LevelType.YOUTH) {
+      const experience = tamagotchi.experience;
+
+      if (
+        experience.feed >= 10 &&
+        experience.play >= 10 &&
+        experience.pet >= 10
+      ) {
+        return LevelType.ADULT;
+      }
+    }
+
+    // 조건을 만족하지 않으면 현재 레벨 유지
+    return currentLevel;
+  }
+
+  // 레벨 업을 수행하는 메소드
+  async levelUp(userId: number, newLevel: LevelType): Promise<void> {
+    const tamagotchi = await this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    if (tamagotchi) {
+      // 레벨을 새로운 레벨로 변경
+      tamagotchi.level = newLevel;
+
+      await this.tamagotchiRepository.update(
+        { user_id: userId },
+        { level: tamagotchi.level },
       );
     }
   }
