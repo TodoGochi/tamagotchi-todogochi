@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryColumn, OneToOne } from 'typeorm';
 import { LevelType as Level } from '../constant/level.enum';
 import { HealthStatusType as HealthStatus } from '../constant/health-status.enum';
 import { Experience } from './experience.entity';
+import { Max } from 'class-validator';
 
 @Entity('tamagotchi')
 export class Tamagotchi {
@@ -26,6 +27,7 @@ export class Tamagotchi {
   nickname: string;
 
   @Column({ type: 'int', nullable: false })
+  @Max(10)
   happiness: number;
 
   @Column({ type: 'date', nullable: false })
@@ -33,6 +35,10 @@ export class Tamagotchi {
 
   @Column({ type: 'timestamp', nullable: true })
   sick_at: Date | null;
+
+  @Column({ type: 'int', nullable: false })
+  @Max(10)
+  hunger: number;
 
   @OneToOne(() => Experience, (experience) => experience.user_id)
   experience: Experience;

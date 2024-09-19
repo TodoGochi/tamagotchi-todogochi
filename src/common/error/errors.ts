@@ -6,24 +6,19 @@ export const ERRORS = {
     message: 'Unknown error, please contact server administrator',
     statusCode: HttpStatusCode.InternalServerError,
   },
-  'USER-0001': {
-    errorCode: 'USER-0001',
-    message: 'Email already exists',
-    statusCode: HttpStatusCode.Conflict,
+  'TAMAGOTCHI-0000': {
+    errorCode: 'TAMAGOTCHI-0000',
+    message: 'Tamagotchi does not exist',
+    statusCode: HttpStatusCode.Forbidden,
   },
-  'USER-0002': {
-    errorCode: 'USER-0002',
-    message: 'Password does not match',
-    statusCode: HttpStatusCode.BadRequest,
+  'TAMAGOTCHI-0001': {
+    errorCode: 'TAMAGOTCHI-0001',
+    message: 'Tamagotchi is not healty',
+    statusCode: HttpStatusCode.Forbidden,
   },
-  'USER-0003': {
-    errorCode: 'USER-0003',
-    message: 'Access Denied',
-    statusCode: HttpStatusCode.Unauthorized,
-  },
-  'USER-0004': {
-    errorCode: 'USER-0004',
-    message: 'User not found',
-    statusCode: HttpStatusCode.NotFound,
+  'TAMAGOTCHI-0002': {
+    errorCode: 'TAMAGOTCHI-0002',
+    message: 'hunger status already max',
+    statusCode: HttpStatusCode.Forbidden,
   },
 };

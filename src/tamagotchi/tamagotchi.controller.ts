@@ -24,7 +24,7 @@ export class TamagotchiController {
 
   @Get()
   async getTamagotchiByUserId(@Body('userId') userId: number) {
-    return this.tamagotchiService.getTamagotchiByUserId(userId);
+    return this.tamagotchiService.findOne(userId);
   }
 
   @Post('feed')

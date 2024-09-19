@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { TamagotchiRepository } from './repository/tamagotchi.repository';
 import { Tamagotchi } from './entity/tamagotchi.entity';
 import { Experience } from './entity/experience.entity';
-import { Repository, DataSource } from 'typeorm'; // DataSource 임포트
+import { Repository, DataSource } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ApiError } from 'src/common/error/api.error';
 
 @Injectable()
 export class TamagotchiService {
   constructor(
-    private readonly tamagotchiRepository: TamagotchiRepository,
+    @InjectRepository(Tamagotchi)
+    private readonly tamagotchiRepository: Repository<Tamagotchi>,
     @InjectRepository(Experience)
     private readonly experienceRepository: Repository<Experience>,
     private readonly dataSource: DataSource,
@@ -24,6 +25,7 @@ export class TamagotchiService {
         nickname: input.nickname,
         happiness: 10,
         created_at: new Date(),
+        hunger: 0,
       };
 
       // Tamagotchi 생성 및 저장
@@ -38,16 +40,32 @@ export class TamagotchiService {
       });
       await manager.save(Experience, experience);
 
-      // Tamagotchi 반환
       return tamagotchi;
     });
   }
 
-  async getTamagotchiByUserId(userId: number): Promise<Tamagotchi | null> {
-    return this.tamagotchiRepository.getOneByPk(userId);
+  async findOne(userId: number): Promise<Tamagotchi | null> {
+    return this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+      relations: ['experience'],
+    });
   }
 
   async feed(userId: number): Promise<Experience> {
+    // 이미 존재하는 Tamagotchi 엔티티 가져오기
+    const tamagotchi = await this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    if (!tamagotchi) {
+      throw new ApiError('TAMAGOTCHI-0000');
+    }
+
+    // 현재 hunger 상태가 10 이상이면 먹일 수 없음
+    if (tamagotchi.hunger >= 10) {
+      throw new ApiError('TAMAGOTCHI-0002');
+    }
+
     // 이미 존재하는 Experience 엔티티 가져오기
     const experience = await this.experienceRepository.findOne({
       where: { user_id: userId },
@@ -56,22 +74,40 @@ export class TamagotchiService {
     // feed 값을 증가시킴
     experience.feed += 1;
 
+    // hunger 값 증가
+    tamagotchi.hunger += 1;
+
+    // Experience와 Tamagotchi 업데이트
     await this.experienceRepository.update(
       { user_id: userId },
       { feed: experience.feed },
     );
 
-    return await this.experienceRepository.findOne({
-      where: { user_id: userId },
-    });
+    await this.tamagotchiRepository.update(
+      { user_id: userId },
+      { hunger: tamagotchi.hunger },
+    );
+
+    return experience;
   }
 
-  // Pet 요청 시 호출되는 메서드
   async pet(userId: number): Promise<Experience> {
     // 이미 존재하는 Experience 엔티티 가져오기
     const experience = await this.experienceRepository.findOne({
       where: { user_id: userId },
     });
+
+    const tamagotchi = await this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    if (tamagotchi.happiness < 10) {
+      tamagotchi.happiness += 1;
+      await this.tamagotchiRepository.update(
+        { user_id: userId },
+        { happiness: tamagotchi.happiness },
+      );
+    }
 
     // pet 값을 증가시킴
     experience.pet += 1;

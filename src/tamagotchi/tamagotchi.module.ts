@@ -4,13 +4,10 @@ import { TamagotchiController } from './tamagotchi.controller';
 import { TamagotchiService } from './tamagotchi.service';
 import { Experience } from './entity/experience.entity';
 import { Tamagotchi } from './entity/tamagotchi.entity';
-import { TamagotchiRepository } from './repository/tamagotchi.repository';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Experience, Tamagotchi, TamagotchiRepository]),
-  ],
+  imports: [TypeOrmModule.forFeature([Experience, Tamagotchi])],
   controllers: [TamagotchiController],
-  providers: [TamagotchiService, TamagotchiRepository],
+  providers: [TamagotchiService],
 })
 export class TamagotchiModule {}

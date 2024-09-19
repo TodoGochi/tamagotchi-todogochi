@@ -7,6 +7,7 @@ import { Logger } from '@nestjs/common';
 export class Config {
   private static instance: Environment;
   private static readonly logger = new Logger();
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
   public static getEnvironment(): Environment {

@@ -21,9 +21,7 @@ export class TamagotchiStatusInterceptor implements NestInterceptor {
     const { userId } = request.body; // 사용자 ID를 요청에서 가져옴
 
     // 다마고치 상태 확인
-    const tamagotchi = await this.tamagotchiService.getTamagotchiByUserId(
-      userId,
-    );
+    const tamagotchi = await this.tamagotchiService.findOne(userId);
     if (tamagotchi.health_status !== HealthStatusType.HEALTHY) {
       throw new ApiError('TAMAGOTCHI-0001');
     }
