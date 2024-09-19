@@ -16,8 +16,8 @@ export class TamagotchiService {
     private readonly experienceRepository: Repository<Experience>,
     private readonly dataSource: DataSource,
   ) {}
-  // 이 메소드는 일정 시간마다 실행됩니다 (지금은 1시간마다 실행되도록 설정)
-  @Interval(2000) // 1시간 = 3600000 밀리초
+
+  @Interval(3600000) // 1시간 = 3600000 밀리초
   async updateTamagotchiStatus(): Promise<void> {
     // 모든 Tamagotchi 가져오기
     const tamagotchis = await this.tamagotchiRepository.find();
@@ -40,6 +40,17 @@ export class TamagotchiService {
       if (updatedHunger === 0 && updatedHealthStatus !== HealthStatus.SICK) {
         updatedHealthStatus = HealthStatus.SICK;
         updatedSickAt = new Date();
+      }
+
+      // sick 상태일 때 10시간이 지났는지 확인
+      if (updatedHealthStatus === HealthStatus.SICK && updatedSickAt) {
+        const currentTime = new Date();
+        const hoursDifference =
+          (currentTime.getTime() - updatedSickAt.getTime()) / (1000 * 60 * 60);
+
+        if (hoursDifference >= 10) {
+          updatedHealthStatus = HealthStatus.DEAD;
+        }
       }
 
       // Tamagotchi 엔티티 업데이트
