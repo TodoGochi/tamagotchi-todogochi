@@ -4,9 +4,13 @@ import { TamagotchiController } from './tamagotchi.controller';
 import { TamagotchiService } from './tamagotchi.service';
 import { Experience } from './entity/experience.entity';
 import { Tamagotchi } from './entity/tamagotchi.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Experience, Tamagotchi])],
+  imports: [
+    TypeOrmModule.forFeature([Experience, Tamagotchi]),
+    ScheduleModule.forRoot(),
+  ],
   controllers: [TamagotchiController],
   providers: [TamagotchiService],
 })

@@ -4,6 +4,8 @@ import { Experience } from './entity/experience.entity';
 import { Repository, DataSource } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ApiError } from 'src/common/error/api.error';
+import { Interval } from '@nestjs/schedule';
+import { HealthStatusType as HealthStatus } from 'src/tamagotchi/constant/health-status.enum';
 
 @Injectable()
 export class TamagotchiService {
@@ -14,6 +16,44 @@ export class TamagotchiService {
     private readonly experienceRepository: Repository<Experience>,
     private readonly dataSource: DataSource,
   ) {}
+  // 이 메소드는 일정 시간마다 실행됩니다 (지금은 1시간마다 실행되도록 설정)
+  @Interval(2000) // 1시간 = 3600000 밀리초
+  async updateTamagotchiStatus(): Promise<void> {
+    // 모든 Tamagotchi 가져오기
+    const tamagotchis = await this.tamagotchiRepository.find();
+
+    for (const tamagotchi of tamagotchis) {
+      let updatedHappiness = tamagotchi.happiness;
+      let updatedHunger = tamagotchi.hunger;
+      let updatedHealthStatus = tamagotchi.health_status;
+      let updatedSickAt = tamagotchi.sick_at;
+
+      // happiness와 hunger가 0보다 크면 1씩 감소
+      if (updatedHappiness > 0) {
+        updatedHappiness -= 1;
+      }
+      if (updatedHunger > 0) {
+        updatedHunger -= 1;
+      }
+
+      // hunger가 0이 되면 health_status를 "sick"으로 변경하고 sick_at에 현재 시간 입력
+      if (updatedHunger === 0 && updatedHealthStatus !== HealthStatus.SICK) {
+        updatedHealthStatus = HealthStatus.SICK;
+        updatedSickAt = new Date();
+      }
+
+      // Tamagotchi 엔티티 업데이트
+      await this.tamagotchiRepository.update(
+        { user_id: tamagotchi.user_id },
+        {
+          happiness: updatedHappiness,
+          hunger: updatedHunger,
+          health_status: updatedHealthStatus,
+          sick_at: updatedSickAt,
+        },
+      );
+    }
+  }
 
   async createTamagotchi(input: {
     userId: number;
@@ -119,5 +159,49 @@ export class TamagotchiService {
     );
 
     return experience;
+  }
+
+  async cure(userId: number): Promise<Tamagotchi> {
+    const tamagotchi = await this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    if (!tamagotchi) {
+      throw new ApiError('TAMAGOTCHI-0000'); // Tamagotchi가 없을 때의 에러 처리
+    }
+
+    // 현재 상태가 sick인지 확인
+    if (tamagotchi.health_status !== HealthStatus.SICK) {
+      throw new ApiError('TAMAGOTCHI-0003'); // Tamagotchi가 sick 상태가 아닐 때의 에러 처리
+    }
+
+    // sick_at으로부터 10시간이 지났는지 확인
+    const currentTime = new Date();
+    const sickTime = tamagotchi.sick_at;
+    const hoursDifference =
+      (currentTime.getTime() - sickTime.getTime()) / (1000 * 60 * 60);
+
+    if (hoursDifference > 10) {
+      throw new ApiError('TAMAGOTCHI-0004'); // 10시간이 지났을 때의 에러 처리
+    }
+
+    // 치료 진행: 상태를 HEALTHY로 변경, sick_at을 null로 설정, happiness와 hunger를 최대값으로 설정
+    tamagotchi.health_status = HealthStatus.HEALTHY;
+    tamagotchi.sick_at = null;
+    tamagotchi.happiness = 10; // happiness 최대값 설정
+    tamagotchi.hunger = 10; // hunger 최대값 설정
+
+    // 변경사항 저장
+    await this.tamagotchiRepository.update(
+      { user_id: userId },
+      {
+        health_status: tamagotchi.health_status,
+        sick_at: tamagotchi.sick_at,
+        happiness: tamagotchi.happiness,
+        hunger: tamagotchi.hunger,
+      },
+    );
+
+    return tamagotchi;
   }
 }

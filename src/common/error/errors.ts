@@ -21,4 +21,14 @@ export const ERRORS = {
     message: 'hunger status already max',
     statusCode: HttpStatusCode.Forbidden,
   },
+  'TAMAGOTCHI-0003': {
+    errorCode: 'TAMAGOTCHI-0003',
+    message: 'Tamagotchi is not sick',
+    statusCode: HttpStatusCode.Forbidden,
+  },
+  'TAMAGOTCHI-0004': {
+    errorCode: 'TAMAGOTCHI-0004',
+    message: 'Tamagotchi can not be cured',
+    statusCode: HttpStatusCode.Forbidden,
+  },
 };
