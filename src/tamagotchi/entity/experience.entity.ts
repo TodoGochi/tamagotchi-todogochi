@@ -3,8 +3,8 @@ import { Tamagotchi } from './tamagotchi.entity';
 
 @Entity('experience')
 export class Experience {
-  @OneToOne(() => Tamagotchi)
-  @JoinColumn({ name: 'user_id' })
+  @OneToOne(() => Tamagotchi, (tamagotchi) => tamagotchi.experience)
+  @JoinColumn({ name: 'user_id' }) // `user_id`를 외래 키로 사용
   @PrimaryColumn()
   user_id: number;
 

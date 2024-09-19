@@ -21,6 +21,9 @@ export class TamagotchiRepository {
   }
 
   async getOneByPk(userId: number): Promise<Tamagotchi | null> {
-    return this.tamagotchiRepository.findOne({ where: { user_id: userId } });
+    return this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+      relations: ['experience'],
+    });
   }
 }

@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToOne } from 'typeorm';
 import { LevelType as Level } from '../constant/level.enum';
 import { HealthStatusType as HealthStatus } from '../constant/health-status.enum';
+import { Experience } from './experience.entity';
 
 @Entity('tamagotchi')
 export class Tamagotchi {
@@ -29,4 +30,10 @@ export class Tamagotchi {
 
   @Column({ type: 'date', nullable: false })
   created_at: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  sick_at: Date | null;
+
+  @OneToOne(() => Experience, (experience) => experience.user_id)
+  experience: Experience;
 }
