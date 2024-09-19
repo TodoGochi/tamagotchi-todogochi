@@ -1,26 +1,25 @@
-import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  ManyToOne,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
-import { Level } from './level.entity';
-import { HealthStatus } from './health-status.entity';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { LevelType as Level } from '../constant/level.enum';
+import { HealthStatusType as HealthStatus } from '../constant/health-status.enum';
 
 @Entity('tamagotchi')
 export class Tamagotchi {
   @PrimaryColumn()
   user_id: number;
 
-  @ManyToOne(() => Level)
-  @JoinColumn({ name: 'level_id' })
-  level_id: number;
+  @Column({
+    type: 'enum',
+    enum: Level,
+    default: Level.EGG,
+  })
+  level: Level;
 
-  @ManyToOne(() => HealthStatus)
-  @JoinColumn({ name: 'health_id' })
-  health_id: number;
+  @Column({
+    type: 'enum',
+    enum: HealthStatus,
+    default: HealthStatus.HEALTHY,
+  })
+  health_status: HealthStatus;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
   nickname: string;

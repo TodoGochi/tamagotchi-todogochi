@@ -17,5 +17,5 @@ export class CreateTamagotchiDto {
     message:
       'Nickname can only contain letters, numbers, and Korean characters.',
   })
-  nickName: string;
+  nickname: string;
 }
