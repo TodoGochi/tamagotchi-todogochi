@@ -18,21 +18,38 @@ export class TamagotchiService {
     private readonly dataSource: DataSource,
   ) {}
 
-  @Interval(2000) // 1시간 = 3600000 밀리초
-  async updateTamagotchiStatus(): Promise<void> {
-    // 모든 Tamagotchi 가져오기
+  // happiness 1시간에 1씩 감소
+  @Interval(3600000) // 1시간 = 3600000 밀리초
+  async updateHappiness(): Promise<void> {
     const tamagotchis = await this.tamagotchiRepository.find();
 
     for (const tamagotchi of tamagotchis) {
       let updatedHappiness = tamagotchi.happiness;
+
+      // happiness가 0보다 크면 1씩 감소
+      if (updatedHappiness > 0) {
+        updatedHappiness -= 1;
+      }
+
+      // Tamagotchi 엔티티 업데이트
+      await this.tamagotchiRepository.update(
+        { user_id: tamagotchi.user_id },
+        { happiness: updatedHappiness },
+      );
+    }
+  }
+
+  // hunger 3시간에 1씩 감소
+  @Interval(10800000) // 3시간 = 10800000 밀리초
+  async updateHunger(): Promise<void> {
+    const tamagotchis = await this.tamagotchiRepository.find();
+
+    for (const tamagotchi of tamagotchis) {
       let updatedHunger = tamagotchi.hunger;
       let updatedHealthStatus = tamagotchi.health_status;
       let updatedSickAt = tamagotchi.sick_at;
 
-      // happiness와 hunger가 0보다 크면 1씩 감소
-      if (updatedHappiness > 0) {
-        updatedHappiness -= 1;
-      }
+      // hunger가 0보다 크면 1씩 감소
       if (updatedHunger > 0) {
         updatedHunger -= 1;
       }
@@ -47,8 +64,7 @@ export class TamagotchiService {
       if (updatedHealthStatus === HealthStatus.SICK && updatedSickAt) {
         const currentTime = new Date();
         const hoursDifference =
-          // (currentTime.getTime() - updatedSickAt.getTime()) / (1000 * 60 * 60);
-          currentTime.getTime() - updatedSickAt.getTime();
+          (currentTime.getTime() - updatedSickAt.getTime()) / (1000 * 60 * 60); // 시간 차이 계산
 
         if (hoursDifference >= 10) {
           updatedHealthStatus = HealthStatus.DEAD;
@@ -59,7 +75,6 @@ export class TamagotchiService {
       await this.tamagotchiRepository.update(
         { user_id: tamagotchi.user_id },
         {
-          happiness: updatedHappiness,
           hunger: updatedHunger,
           health_status: updatedHealthStatus,
           sick_at: updatedSickAt,
