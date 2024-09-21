@@ -50,7 +50,7 @@ export class TamagotchiService {
       let updatedSickAt = tamagotchi.sick_at;
 
       // hunger가 0보다 크면 1씩 감소
-      if (updatedHunger > 0) {
+      if (updatedHunger > 0 && tamagotchi.level !== LevelType.EGG) {
         updatedHunger -= 1;
       }
 
