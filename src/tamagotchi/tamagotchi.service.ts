@@ -310,4 +310,48 @@ export class TamagotchiService {
 
     return tamagotchi;
   }
+
+  async restart(userId: number): Promise<Tamagotchi> {
+    const tamagotchi = await this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    const experience = await this.experienceRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    // 현재 상태가 "Dead"인지 확인
+    if (tamagotchi.health_status !== HealthStatus.DEAD) {
+      throw new ApiError('TAMAGOTCHI-0005'); // Tamagotchi가 Dead 상태가 아닐 때의 에러 처리
+    }
+
+    // 부활 진행: health_status를 "HEALTHY"로 변경, happiness와 hunger를 10으로 설정
+    tamagotchi.health_status = HealthStatus.HEALTHY;
+    tamagotchi.happiness = 10;
+    tamagotchi.hunger = 10;
+
+    experience.feed = 0;
+    experience.pet = 0;
+    experience.play = 0;
+
+    await this.experienceRepository.update(
+      {
+        user_id: userId,
+      },
+      { feed: experience.feed, pet: experience.pet, play: experience.pet },
+    );
+
+    // Tamagotchi와 Experience 업데이트
+    await this.tamagotchiRepository.update(
+      { user_id: userId },
+      {
+        health_status: tamagotchi.health_status,
+        happiness: tamagotchi.happiness,
+        hunger: tamagotchi.hunger,
+        sick_at: null, // 부활 시 sick_at을 null로 초기화
+      },
+    );
+
+    return tamagotchi;
+  }
 }

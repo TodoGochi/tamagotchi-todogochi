@@ -56,4 +56,9 @@ export class TamagotchiController {
   // async play(@Body('userId') userId: number) {
   //   return this.tamagotchiService.play(userId);
   // }
+
+  @Post('restart')
+  async restart(@Body('userId') userId: number) {
+    return this.tamagotchiService.restart(userId);
+  }
 }
