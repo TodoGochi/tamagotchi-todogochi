@@ -170,7 +170,7 @@ export class TamagotchiService {
     });
   }
 
-  async feed(userId: number): Promise<Experience> {
+  async feed(userId: number): Promise<Tamagotchi> {
     // 이미 존재하는 Tamagotchi 엔티티 가져오기
     const tamagotchi = await this.tamagotchiRepository.findOne({
       where: { user_id: userId },
@@ -207,10 +207,10 @@ export class TamagotchiService {
       { hunger: tamagotchi.hunger },
     );
 
-    return experience;
+    return tamagotchi;
   }
 
-  async pet(userId: number): Promise<Experience> {
+  async pet(userId: number): Promise<Tamagotchi> {
     // 이미 존재하는 Experience 엔티티 가져오기
     const experience = await this.experienceRepository.findOne({
       where: { user_id: userId },
@@ -237,7 +237,7 @@ export class TamagotchiService {
       { pet: experience.pet },
     );
 
-    return experience;
+    return tamagotchi;
   }
 
   async cure(userId: number): Promise<Tamagotchi> {
