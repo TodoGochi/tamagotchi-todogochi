@@ -7,6 +7,7 @@ import { ApiError } from 'src/common/error/api.error';
 import { Interval } from '@nestjs/schedule';
 import { HealthStatusType as HealthStatus } from 'src/tamagotchi/constant/health-status.enum';
 import { LevelType } from './constant/level.enum';
+import { UserService as UserServer } from 'src/provider/server/services/user.service';
 
 @Injectable()
 export class TamagotchiService {
@@ -16,6 +17,7 @@ export class TamagotchiService {
     @InjectRepository(Experience)
     private readonly experienceRepository: Repository<Experience>,
     private readonly dataSource: DataSource,
+    private readonly userService: UserServer,
   ) {}
 
   // happiness 1시간에 1씩 감소
@@ -353,5 +355,83 @@ export class TamagotchiService {
     );
 
     return tamagotchi;
+  }
+
+  async play(userId: number): Promise<any> {
+    const tamagotchi = await this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    const experience = await this.experienceRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    experience.play += 1;
+
+    await this.experienceRepository.update(
+      {
+        user_id: userId,
+      },
+      { play: experience.play },
+    );
+
+    console.log(experience.play);
+
+    // 5% 확률로 특정 기능 실행
+    const randomValue = Math.random();
+    if (randomValue <= 0.5) {
+      // 50% 확률로 a 또는 b 실행
+      const randomValueForAction = Math.random();
+      if (randomValueForAction <= 0.5) {
+        console.log('50% 확률로 2코인 획득');
+        const response = await this.userService.post({
+          path: `http://localhost:4000/user/${userId}/coin-transactions`,
+          data: {
+            changeAmount: 2,
+            description: 'Gained 2 coin while playing with tamagotchi',
+          },
+        });
+        const { coin, changeAmount } = response.data;
+
+        // Tamagotchi 객체에 추가
+        const updatedTamagotchi = {
+          ...tamagotchi,
+          coin, // 코인 정보 추가
+          changeAmount, // 변경된 코인 양 추가
+        };
+        return updatedTamagotchi;
+      } else {
+        console.log('50% 확률로 1코인 획득');
+        const response = await this.userService.post({
+          path: `http://localhost:4000/user/${userId}/coin-transactions`,
+          data: {
+            changeAmount: 1,
+            description: 'Gained 1 coin while playing with tamagotchi',
+          },
+        });
+        const { coin, changeAmount } = response.data;
+
+        // Tamagotchi 객체에 추가
+        const updatedTamagotchi = {
+          ...tamagotchi,
+          coin, // 코인 정보 추가
+          changeAmount, // 변경된 코인 양 추가
+        };
+        return updatedTamagotchi;
+      }
+    }
+    console.log('꽝');
+    const response = await this.userService.get({
+      path: `http://localhost:4000/user/${userId}`,
+    });
+
+    const { coin } = response.data;
+
+    const updatedTamagotchi = {
+      ...tamagotchi,
+      coin, // 코인 정보 추가
+      changeAmount: 0, // 변경된 코인 양 추가
+    };
+    return updatedTamagotchi;
   }
 }

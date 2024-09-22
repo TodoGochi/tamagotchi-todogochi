@@ -24,7 +24,7 @@ export class TamagotchiController {
   }
 
   @Get()
-  @UseInterceptors(LevelUpInterceptor)
+  // @UseInterceptors(LevelUpInterceptor)
   async getTamagotchiByUserId(@Body('userId') userId: number) {
     return this.tamagotchiService.findOne(userId);
   }
@@ -36,7 +36,6 @@ export class TamagotchiController {
   }
 
   @Post('pet')
-  @UseInterceptors(TamagotchiStatusInterceptor, LevelUpInterceptor)
   async pet(@Body('userId') userId: number) {
     return this.tamagotchiService.pet(userId);
   }
@@ -51,12 +50,12 @@ export class TamagotchiController {
     return this.tamagotchiService.resurrect(userId);
   }
 
-  // @Post('play')
-  // @UseInterceptors(TamagotchiStatusInterceptor, LevelUpInterceptor)
-  // async play(@Body('userId') userId: number) {
-  //   return this.tamagotchiService.play(userId);
-  // }
-
+  @Post('play')
+  @UseInterceptors(TamagotchiStatusInterceptor, LevelUpInterceptor)
+  async play(@Body('userId') userId: number) {
+    return this.tamagotchiService.play(userId);
+  }
+  ㅂ;
   @Post('restart')
   async restart(@Body('userId') userId: number) {
     return this.tamagotchiService.restart(userId);

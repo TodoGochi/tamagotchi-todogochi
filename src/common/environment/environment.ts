@@ -41,4 +41,7 @@ export class Environment {
     refreshSecret: process.env.JWT_REFRESH_SECRET,
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
   });
+
+  @IsString()
+  USER_SERVER_ADDR = process.env.USER_SERVER_ADDR;
 }
