@@ -23,10 +23,10 @@ export class TamagotchiController {
     return await this.tamagotchiService.createTamagotchi(body);
   }
 
-  @Get()
+  @Get(':id')
   // @UseInterceptors(LevelUpInterceptor)
-  async getTamagotchiByUserId(@Body('userId') userId: number) {
-    return this.tamagotchiService.findOne(userId);
+  async getTamagotchiByUserId(@Param('id') id: number) {
+    return this.tamagotchiService.findOne(id);
   }
 
   @Post('feed')
@@ -55,7 +55,7 @@ export class TamagotchiController {
   async play(@Body('userId') userId: number) {
     return this.tamagotchiService.play(userId);
   }
-  ㅂ;
+
   @Post('restart')
   async restart(@Body('userId') userId: number) {
     return this.tamagotchiService.restart(userId);
