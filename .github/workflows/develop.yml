@@ -12,8 +12,8 @@ jobs:
       - name: Deploy via SSH
         env:
           PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
-          HOSTNAME: 'ec2-43-203-231-6.ap-northeast-2.compute.amazonaws.com'
-          USER_NAME: 'ec2-user'
+          HOSTNAME: ${{ secrets.AWS_HOSTNAME }}
+          USER_NAME: 'ubuntu'
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
