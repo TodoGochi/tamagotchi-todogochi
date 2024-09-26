@@ -385,7 +385,7 @@ export class TamagotchiService {
       if (randomValueForAction <= 0.5) {
         console.log('50% 확률로 2코인 획득');
         const response = await this.userService.post({
-          path: `http://localhost:4000/user/${userId}/coin-transactions`,
+          path: `/user/${userId}/coin-transactions`,
           data: {
             changeAmount: 2,
             description: 'Gained 2 coin while playing with tamagotchi',
