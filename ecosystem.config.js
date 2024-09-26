@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'user-todogochi',
+      name: 'tamagochi-todogochi',
       script: 'npm',
       args: ['run', 'start:prod'],
     },
