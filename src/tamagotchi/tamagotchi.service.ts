@@ -403,7 +403,7 @@ export class TamagotchiService {
       } else {
         console.log('50% 확률로 1코인 획득');
         const response = await this.userService.post({
-          path: `http://localhost:4000/user/${userId}/coin-transactions`,
+          path: `/user/${userId}/coin-transactions`,
           data: {
             changeAmount: 1,
             description: 'Gained 1 coin while playing with tamagotchi',
@@ -422,7 +422,7 @@ export class TamagotchiService {
     }
     console.log('꽝');
     const response = await this.userService.get({
-      path: `http://localhost:4000/user/${userId}`,
+      path: `/user/${userId}`,
     });
 
     const { coin } = response.data;
