@@ -96,12 +96,12 @@ export class TamagotchiService {
         (currentTime.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
 
       if (daysDifference >= 2) {
-        return LevelType.YOUTH;
+        return LevelType.BABY;
       }
     }
 
     // 2레벨에서 3레벨로: 행동이 각각 10번 이상일 때 업그레이드
-    if (currentLevel === LevelType.YOUTH) {
+    if (currentLevel === LevelType.BABY) {
       const experience = tamagotchi.experience;
 
       if (
