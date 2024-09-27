@@ -1,5 +1,5 @@
 export enum LevelType {
   EGG = 'egg',
-  YOUTH = 'baby',
+  BABY = 'baby',
   ADULT = 'adult',
 }
