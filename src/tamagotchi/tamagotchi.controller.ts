@@ -23,7 +23,7 @@ export class TamagotchiController {
     return await this.tamagotchiService.createTamagotchi(body);
   }
 
-  @Get(':id')
+  @Get(':id/status')
   // @UseInterceptors(LevelUpInterceptor)
   async getTamagotchiByUserId(@Param('id') id: number) {
     return this.tamagotchiService.findOne(id);
