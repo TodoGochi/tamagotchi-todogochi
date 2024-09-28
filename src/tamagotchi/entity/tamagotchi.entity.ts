@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToOne, Timestamp } from 'typeorm';
 import { LevelType as Level } from '../constant/level.enum';
 import { HealthStatusType as HealthStatus } from '../constant/health-status.enum';
 import { Experience } from './experience.entity';
@@ -30,7 +30,7 @@ export class Tamagotchi {
   @Max(10)
   happiness: number;
 
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'timestamp', nullable: false })
   created_at: Date;
 
   @Column({ type: 'timestamp', nullable: true })

@@ -144,7 +144,7 @@ export class TamagotchiService {
         nickname: input.nickname,
         happiness: 10,
         created_at: new Date(),
-        hunger: 0,
+        hunger: 10,
       };
 
       // Tamagotchi 생성 및 저장
@@ -433,5 +433,40 @@ export class TamagotchiService {
       changeAmount: 0, // 변경된 코인 양 추가
     };
     return updatedTamagotchi;
+  }
+
+  async levelProgress(userId: number): Promise<any> {
+    const { created_at } = await this.tamagotchiRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    const createdAt = new Date(created_at);
+    console.log(createdAt);
+    const now = new Date();
+
+    // 48시간을 밀리초로 변환 (48시간 * 60분 * 60초 * 1000밀리초)
+    const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
+
+    // 48시간에서 경과한 시간을 빼서 남은 시간 계산
+    const elapsedMs = now.getTime() - createdAt.getTime();
+    const remainedMs = fortyEightHoursInMs - elapsedMs;
+
+    if (remainedMs <= 0) {
+      return {
+        hour: 0,
+        min: 0,
+      };
+    }
+
+    // 남은 시간을 시간과 분으로 변환
+    const remainedHours = Math.floor(remainedMs / (60 * 60 * 1000));
+    const remainedMinutes = Math.floor(
+      (remainedMs % (60 * 60 * 1000)) / (60 * 1000),
+    );
+
+    return {
+      hour: remainedHours,
+      min: remainedMinutes,
+    };
   }
 }

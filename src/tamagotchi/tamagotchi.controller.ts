@@ -60,4 +60,9 @@ export class TamagotchiController {
   async restart(@Body('userId') userId: number) {
     return this.tamagotchiService.restart(userId);
   }
+
+  @Get(':id/level-progress')
+  async levelProgress(@Param('id') id: number) {
+    return this.tamagotchiService.levelProgress(id);
+  }
 }
