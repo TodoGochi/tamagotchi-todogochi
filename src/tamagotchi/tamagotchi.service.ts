@@ -139,6 +139,13 @@ export class TamagotchiService {
     nickname: string;
   }): Promise<Tamagotchi> {
     return await this.dataSource.transaction(async (manager) => {
+      const existingTamagotchi = await manager.findOne(Tamagotchi, {
+        where: { user_id: input.userId },
+      });
+      if (existingTamagotchi) {
+        throw new ApiError('TAMAGOTCHI-0006');
+      }
+
       const tamagotchiData: Partial<Tamagotchi> = {
         user_id: input.userId,
         nickname: input.nickname,
