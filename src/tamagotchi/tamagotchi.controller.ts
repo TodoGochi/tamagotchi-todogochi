@@ -9,7 +9,8 @@ import {
 import { TamagotchiService } from './tamagotchi.service';
 import { CreateTamagotchiDto } from './dto/create-Tamagotchi.dto';
 import { Tamagotchi } from './entity/tamagotchi.entity';
-import { TamagotchiStatusInterceptor } from 'src/interceptors/tamagotchi-status.interceptor';
+import { TamagotchiStatusHealthyInterceptor } from 'src/interceptors/tamagotchi-status-healthy.interceptor';
+import { TamagotchiStatusSickInterceptor } from 'src/interceptors/tamagotchi-status-sick.interceptor';
 import { LevelUpInterceptor } from 'src/interceptors/level-up.interceptor';
 
 @Controller('tamagotchi')
@@ -24,13 +25,12 @@ export class TamagotchiController {
   }
 
   @Get(':id/status')
-  // @UseInterceptors(LevelUpInterceptor)
   async getTamagotchiByUserId(@Param('id') id: number) {
     return this.tamagotchiService.findOne(id);
   }
 
   @Post('feed')
-  @UseInterceptors(TamagotchiStatusInterceptor, LevelUpInterceptor)
+  @UseInterceptors(TamagotchiStatusHealthyInterceptor, LevelUpInterceptor)
   async feed(@Body('userId') userId: number) {
     return this.tamagotchiService.feed(userId);
   }
@@ -41,6 +41,7 @@ export class TamagotchiController {
   }
 
   @Post('cure')
+  @UseInterceptors(TamagotchiStatusSickInterceptor)
   async cure(@Body('userId') userId: number) {
     return this.tamagotchiService.cure(userId);
   }
@@ -51,7 +52,7 @@ export class TamagotchiController {
   }
 
   @Post('play')
-  @UseInterceptors(TamagotchiStatusInterceptor, LevelUpInterceptor)
+  @UseInterceptors(TamagotchiStatusHealthyInterceptor, LevelUpInterceptor)
   async play(@Body('userId') userId: number) {
     return this.tamagotchiService.play(userId);
   }

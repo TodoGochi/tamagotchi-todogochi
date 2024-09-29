@@ -104,11 +104,7 @@ export class TamagotchiService {
     if (currentLevel === LevelType.BABY) {
       const experience = tamagotchi.experience;
 
-      if (
-        experience.feed >= 10 &&
-        experience.play >= 10 &&
-        experience.pet >= 10
-      ) {
+      if (experience.feed >= 9 && experience.play >= 9 && experience.pet >= 9) {
         return LevelType.ADULT;
       }
     }
@@ -149,9 +145,9 @@ export class TamagotchiService {
       const tamagotchiData: Partial<Tamagotchi> = {
         user_id: input.userId,
         nickname: input.nickname,
-        happiness: 10,
+        happiness: 9,
         created_at: new Date(),
-        hunger: 10,
+        hunger: 9,
       };
 
       // Tamagotchi 생성 및 저장
@@ -264,6 +260,9 @@ export class TamagotchiService {
     // sick_at으로부터 10시간이 지났는지 확인
     const currentTime = new Date();
     const sickTime = tamagotchi.sick_at;
+    if (!sickTime) {
+      throw new ApiError('TAMAGOTCHI-0003');
+    }
     const hoursDifference =
       (currentTime.getTime() - sickTime.getTime()) / (1000 * 60 * 60);
 
@@ -274,8 +273,8 @@ export class TamagotchiService {
     // 치료 진행: 상태를 HEALTHY로 변경, sick_at을 null로 설정, happiness와 hunger를 최대값으로 설정
     tamagotchi.health_status = HealthStatus.HEALTHY;
     tamagotchi.sick_at = null;
-    tamagotchi.happiness = 10; // happiness 최대값 설정
-    tamagotchi.hunger = 10; // hunger 최대값 설정
+    tamagotchi.happiness = 9; // happiness 최대값 설정
+    tamagotchi.hunger = 9; // hunger 최대값 설정
 
     // 변경사항 저장
     await this.tamagotchiRepository.update(
@@ -303,8 +302,8 @@ export class TamagotchiService {
 
     // 부활 진행: health_status를 "HEALTHY"로 변경, happiness와 hunger를 10으로 설정
     tamagotchi.health_status = HealthStatus.HEALTHY;
-    tamagotchi.happiness = 10;
-    tamagotchi.hunger = 10;
+    tamagotchi.happiness = 9;
+    tamagotchi.hunger = 9;
 
     // Tamagotchi와 Experience 업데이트
     await this.tamagotchiRepository.update(

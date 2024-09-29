@@ -10,7 +10,7 @@ import { TamagotchiService } from 'src/tamagotchi/tamagotchi.service';
 import { ApiError } from 'src/common/error/api.error';
 import { HealthStatusType } from 'src/tamagotchi/constant/health-status.enum';
 @Injectable()
-export class TamagotchiStatusInterceptor implements NestInterceptor {
+export class TamagotchiStatusHealthyInterceptor implements NestInterceptor {
   constructor(private readonly tamagotchiService: TamagotchiService) {}
 
   async intercept(
