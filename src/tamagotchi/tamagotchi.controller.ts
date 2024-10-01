@@ -25,44 +25,48 @@ export class TamagotchiController {
   }
 
   @Get(':id/status')
+  @UseInterceptors(LevelUpInterceptor)
   async getTamagotchiByUserId(@Param('id') id: number) {
     return this.tamagotchiService.findOne(id);
   }
 
-  @Post('feed')
+  @Post(':id/feed')
   @UseInterceptors(TamagotchiStatusHealthyInterceptor, LevelUpInterceptor)
-  async feed(@Body('userId') userId: number) {
-    return this.tamagotchiService.feed(userId);
+  async feed(@Param('id') id: number) {
+    return this.tamagotchiService.feed(id);
   }
 
-  @Post('pet')
-  async pet(@Body('userId') userId: number) {
-    return this.tamagotchiService.pet(userId);
-  }
-
-  @Post('cure')
-  @UseInterceptors(TamagotchiStatusSickInterceptor)
-  async cure(@Body('userId') userId: number) {
-    return this.tamagotchiService.cure(userId);
-  }
-
-  @Post('resurrect')
-  async resurrect(@Body('userId') userId: number) {
-    return this.tamagotchiService.resurrect(userId);
-  }
-
-  @Post('play')
+  @Post(':id/pet')
   @UseInterceptors(TamagotchiStatusHealthyInterceptor, LevelUpInterceptor)
-  async play(@Body('userId') userId: number) {
-    return this.tamagotchiService.play(userId);
+  async pet(@Param('id') id: number) {
+    return this.tamagotchiService.pet(id);
   }
 
-  @Post('restart')
-  async restart(@Body('userId') userId: number) {
-    return this.tamagotchiService.restart(userId);
+  @Post(':id/cure')
+  @UseInterceptors(TamagotchiStatusSickInterceptor, LevelUpInterceptor)
+  async cure(@Param('id') id: number) {
+    return this.tamagotchiService.cure(id);
+  }
+
+  @Post(':id/resurrect')
+  @UseInterceptors(LevelUpInterceptor)
+  async resurrect(@Param('id') id: number) {
+    return this.tamagotchiService.resurrect(id);
+  }
+
+  @Post(':id/play')
+  @UseInterceptors(TamagotchiStatusHealthyInterceptor, LevelUpInterceptor)
+  async play(@Body('userId') userId: number, @Param('id') id: number) {
+    return this.tamagotchiService.play(userId, id);
+  }
+
+  @Post(':id/restart')
+  async restart(@Param('id') id: number) {
+    return this.tamagotchiService.restart(id);
   }
 
   @Get(':id/level-progress')
+  @UseInterceptors(LevelUpInterceptor)
   async levelProgress(@Param('id') id: number) {
     return this.tamagotchiService.levelProgress(id);
   }

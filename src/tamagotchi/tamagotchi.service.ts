@@ -96,6 +96,7 @@ export class TamagotchiService {
         (currentTime.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
 
       if (daysDifference >= 2) {
+        console.log('2일 지남');
         return LevelType.BABY;
       }
     }
@@ -114,9 +115,9 @@ export class TamagotchiService {
   }
 
   // 레벨 업을 수행하는 메소드
-  async levelUp(userId: number, newLevel: LevelType): Promise<void> {
+  async levelUp(id: number, newLevel: LevelType): Promise<void> {
     const tamagotchi = await this.tamagotchiRepository.findOne({
-      where: { user_id: userId },
+      where: { id },
     });
 
     if (tamagotchi) {
@@ -124,7 +125,7 @@ export class TamagotchiService {
       tamagotchi.level = newLevel;
 
       await this.tamagotchiRepository.update(
-        { user_id: userId },
+        { id },
         { level: tamagotchi.level },
       );
     }
@@ -142,25 +143,25 @@ export class TamagotchiService {
         throw new ApiError('TAMAGOTCHI-0006');
       }
 
+      const experience = new Experience();
+      experience.feed = 0;
+      experience.play = 0;
+      experience.pet = 0;
+
+      // Experience 엔티티를 먼저 저장
+      const savedExperience = await manager.save(Experience, experience);
+
       const tamagotchiData: Partial<Tamagotchi> = {
         user_id: input.userId,
         nickname: input.nickname,
         happiness: 9,
         created_at: new Date(),
         hunger: 9,
+        experience: savedExperience, // 저장된 experience 할당
       };
 
       // Tamagotchi 생성 및 저장
       const tamagotchi = await manager.save(Tamagotchi, tamagotchiData);
-
-      // Experience 생성 및 저장
-      const experience = this.experienceRepository.create({
-        user_id: input.userId,
-        feed: 0,
-        play: 0,
-        pet: 0,
-      });
-      await manager.save(Experience, experience);
 
       return tamagotchi;
     });
@@ -173,10 +174,11 @@ export class TamagotchiService {
     });
   }
 
-  async feed(userId: number): Promise<Tamagotchi> {
+  async feed(id: number): Promise<Tamagotchi> {
     // 이미 존재하는 Tamagotchi 엔티티 가져오기
     const tamagotchi = await this.tamagotchiRepository.findOne({
-      where: { user_id: userId },
+      where: { id },
+      relations: ['experience'], // experience 관계를 포함하여 가져오기
     });
 
     if (!tamagotchi) {
@@ -188,64 +190,54 @@ export class TamagotchiService {
       throw new ApiError('TAMAGOTCHI-0002');
     }
 
-    // 이미 존재하는 Experience 엔티티 가져오기
-    const experience = await this.experienceRepository.findOne({
-      where: { user_id: userId },
-    });
-
     // feed 값을 증가시킴
-    experience.feed += 1;
+    if (tamagotchi.experience) {
+      tamagotchi.experience.feed += 1;
+    } else {
+      throw new ApiError('TAMAGOTCHI-0001'); // Experience가 없을 경우 에러 처리
+    }
 
     // hunger 값 증가
     tamagotchi.hunger += 1;
 
     // Experience와 Tamagotchi 업데이트
-    await this.experienceRepository.update(
-      { user_id: userId },
-      { feed: experience.feed },
-    );
-
-    await this.tamagotchiRepository.update(
-      { user_id: userId },
-      { hunger: tamagotchi.hunger },
-    );
+    await this.tamagotchiRepository.save(tamagotchi);
 
     return tamagotchi;
   }
 
-  async pet(userId: number): Promise<Tamagotchi> {
-    // 이미 존재하는 Experience 엔티티 가져오기
-    const experience = await this.experienceRepository.findOne({
-      where: { user_id: userId },
-    });
-
+  async pet(id: number): Promise<Tamagotchi> {
+    // 이미 존재하는 Tamagotchi 엔티티 가져오기 (experience 관계 포함)
     const tamagotchi = await this.tamagotchiRepository.findOne({
-      where: { user_id: userId },
+      where: { id },
+      relations: ['experience'], // experience를 포함하여 가져오기
     });
 
-    if (tamagotchi.happiness < 10) {
-      tamagotchi.happiness += 1;
-      await this.tamagotchiRepository.update(
-        { user_id: userId },
-        { happiness: tamagotchi.happiness },
-      );
+    if (!tamagotchi) {
+      throw new ApiError('TAMAGOTCHI-0000');
     }
 
-    // pet 값을 증가시킴
-    experience.pet += 1;
+    // happiness가 10 미만일 때만 증가
+    if (tamagotchi.happiness < 9) {
+      tamagotchi.happiness += 1;
+    }
 
-    // 엔티티 업데이트 및 저장
-    await this.experienceRepository.update(
-      { user_id: userId },
-      { pet: experience.pet },
-    );
+    // experience의 pet 값 증가
+    if (tamagotchi.experience) {
+      tamagotchi.experience.pet += 1;
+    } else {
+      throw new ApiError('TAMAGOTCHI-0001'); // Experience가 없을 경우 에러 처리 (이 경우는 발생하지 않아야 함)
+    }
+
+    // Tamagotchi와 Experience 업데이트 및 저장
+    await this.tamagotchiRepository.save(tamagotchi);
 
     return tamagotchi;
   }
 
-  async cure(userId: number): Promise<Tamagotchi> {
+  async cure(id: number): Promise<Tamagotchi> {
     const tamagotchi = await this.tamagotchiRepository.findOne({
-      where: { user_id: userId },
+      where: { id },
     });
 
     if (!tamagotchi) {
@@ -278,7 +270,7 @@ export class TamagotchiService {
 
     // 변경사항 저장
     await this.tamagotchiRepository.update(
-      { user_id: userId },
+      { id },
       {
         health_status: tamagotchi.health_status,
         sick_at: tamagotchi.sick_at,
@@ -290,9 +282,9 @@ export class TamagotchiService {
     return tamagotchi;
   }
 
-  async resurrect(userId: number): Promise<Tamagotchi> {
+  async resurrect(id: number): Promise<Tamagotchi> {
     const tamagotchi = await this.tamagotchiRepository.findOne({
-      where: { user_id: userId },
+      where: { id },
     });
 
     // 현재 상태가 "Dead"인지 확인
@@ -307,7 +299,7 @@ export class TamagotchiService {
 
     // Tamagotchi와 Experience 업데이트
     await this.tamagotchiRepository.update(
-      { user_id: userId },
+      { id },
       {
         health_status: tamagotchi.health_status,
         happiness: tamagotchi.happiness,
@@ -319,14 +311,16 @@ export class TamagotchiService {
     return tamagotchi;
   }
 
-  async restart(userId: number): Promise<Tamagotchi> {
+  async restart(id: number): Promise<Tamagotchi> {
+    // Tamagotchi 엔티티 가져오기 (experience 관계 포함)
     const tamagotchi = await this.tamagotchiRepository.findOne({
-      where: { user_id: userId },
+      where: { id },
+      relations: ['experience'],
     });
 
-    const experience = await this.experienceRepository.findOne({
-      where: { user_id: userId },
-    });
+    if (!tamagotchi) {
+      throw new ApiError('TAMAGOTCHI-0000'); // Tamagotchi가 존재하지 않을 경우 에러 처리
+    }
 
     // 현재 상태가 "Dead"인지 확인
     if (tamagotchi.health_status !== HealthStatus.DEAD) {
@@ -335,97 +329,73 @@ export class TamagotchiService {
 
     // 부활 진행: health_status를 "HEALTHY"로 변경, happiness와 hunger를 10으로 설정
     tamagotchi.health_status = HealthStatus.HEALTHY;
-    tamagotchi.happiness = 10;
-    tamagotchi.hunger = 10;
+    tamagotchi.happiness = 9;
+    tamagotchi.hunger = 9;
+    tamagotchi.sick_at = null; // 부활 시 sick_at을 null로 초기화
 
-    experience.feed = 0;
-    experience.pet = 0;
-    experience.play = 0;
+    if (tamagotchi.experience) {
+      tamagotchi.experience.feed = 0;
+      tamagotchi.experience.pet = 0;
+      tamagotchi.experience.play = 0;
+    } else {
+      throw new ApiError('TAMAGOTCHI-0001'); // Experience가 없을 경우 에러 처리 (이 경우는 발생하지 않아야 함)
+    }
 
-    await this.experienceRepository.update(
-      {
-        user_id: userId,
-      },
-      { feed: experience.feed, pet: experience.pet, play: experience.pet },
-    );
-
-    // Tamagotchi와 Experience 업데이트
-    await this.tamagotchiRepository.update(
-      { user_id: userId },
-      {
-        health_status: tamagotchi.health_status,
-        happiness: tamagotchi.happiness,
-        hunger: tamagotchi.hunger,
-        sick_at: null, // 부활 시 sick_at을 null로 초기화
-      },
-    );
+    // Tamagotchi와 Experience 업데이트 및 저장
+    await this.tamagotchiRepository.save(tamagotchi);
 
     return tamagotchi;
   }
 
-  async play(userId: number): Promise<any> {
+  async play(userId: number, id: number): Promise<any> {
+    // Tamagotchi 엔티티 가져오기 (experience 관계 포함)
     const tamagotchi = await this.tamagotchiRepository.findOne({
-      where: { user_id: userId },
+      where: { id },
+      relations: ['experience'],
     });
 
-    const experience = await this.experienceRepository.findOne({
-      where: { user_id: userId },
-    });
+    if (!tamagotchi) {
+      throw new ApiError('TAMAGOTCHI-0000'); // Tamagotchi가 존재하지 않을 경우 에러 처리
+    }
 
-    experience.play += 1;
+    // play 값 증가
+    if (tamagotchi.experience) {
+      tamagotchi.experience.play += 1;
+    } else {
+      throw new ApiError('TAMAGOTCHI-0001'); // Experience가 없을 경우 에러 처리 (이 경우는 발생하지 않아야 함)
+    }
 
-    await this.experienceRepository.update(
-      {
-        user_id: userId,
-      },
-      { play: experience.play },
-    );
+    console.log(tamagotchi.experience.play);
 
-    console.log(experience.play);
-
-    // 5% 확률로 특정 기능 실행
+    // 50% 확률로 특정 기능 실행
     const randomValue = Math.random();
     if (randomValue <= 0.5) {
       // 50% 확률로 a 또는 b 실행
       const randomValueForAction = Math.random();
-      if (randomValueForAction <= 0.5) {
-        console.log('50% 확률로 2코인 획득');
-        const response = await this.userService.post({
-          path: `/user/${userId}/coin-transactions`,
-          data: {
-            changeAmount: 2,
-            description: 'Gained 2 coin while playing with tamagotchi',
-          },
-        });
-        const { coin, changeAmount } = response.data;
+      const changeAmount = randomValueForAction <= 0.5 ? 2 : 1;
 
-        // Tamagotchi 객체에 추가
-        const updatedTamagotchi = {
-          ...tamagotchi,
-          coin, // 코인 정보 추가
-          changeAmount, // 변경된 코인 양 추가
-        };
-        return updatedTamagotchi;
-      } else {
-        console.log('50% 확률로 1코인 획득');
-        const response = await this.userService.post({
-          path: `/user/${userId}/coin-transactions`,
-          data: {
-            changeAmount: 1,
-            description: 'Gained 1 coin while playing with tamagotchi',
-          },
-        });
-        const { coin, changeAmount } = response.data;
+      console.log(`50% 확률로 ${changeAmount}코인 획득`);
+      const response = await this.userService.post({
+        path: `/user/${userId}/coin-transactions`,
+        data: {
+          changeAmount,
+          description: `Gained ${changeAmount} coin while playing with tamagotchi`,
+        },
+      });
 
-        // Tamagotchi 객체에 추가
-        const updatedTamagotchi = {
-          ...tamagotchi,
-          coin, // 코인 정보 추가
-          changeAmount, // 변경된 코인 양 추가
-        };
-        return updatedTamagotchi;
-      }
+      const { coin } = response.data;
+
+      // Tamagotchi 객체에 추가
+      const updatedTamagotchi = {
+        ...tamagotchi,
+        coin, // 코인 정보 추가
+        changeAmount, // 변경된 코인 양 추가
+      };
+
+      await this.tamagotchiRepository.save(tamagotchi);
+      return updatedTamagotchi;
     }
+
     console.log('꽝');
     const response = await this.userService.get({
       path: `/user/${userId}`,
@@ -438,12 +408,14 @@ export class TamagotchiService {
       coin, // 코인 정보 추가
       changeAmount: 0, // 변경된 코인 양 추가
     };
+
+    await this.tamagotchiRepository.save(tamagotchi);
     return updatedTamagotchi;
   }
 
-  async levelProgress(userId: number): Promise<any> {
+  async levelProgress(id: number): Promise<any> {
     const { created_at } = await this.tamagotchiRepository.findOne({
-      where: { user_id: userId },
+      where: { id },
     });
 
     const createdAt = new Date(created_at);

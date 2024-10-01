@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryColumn, OneToOne, Timestamp } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { LevelType as Level } from '../constant/level.enum';
 import { HealthStatusType as HealthStatus } from '../constant/health-status.enum';
 import { Experience } from './experience.entity';
@@ -6,7 +12,10 @@ import { Max } from 'class-validator';
 
 @Entity('tamagotchi')
 export class Tamagotchi {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id: number; // 자동 증가 기본 키
+
+  @Column()
   user_id: number;
 
   @Column({
@@ -40,6 +49,7 @@ export class Tamagotchi {
   @Max(9)
   hunger: number;
 
-  @OneToOne(() => Experience, (experience) => experience.user_id)
-  experience: Experience;
+  @OneToOne(() => Experience, (experience) => experience.id, { cascade: true })
+  @JoinColumn()
+  experience: Experience; // 외래 키 관계 정의
 }
