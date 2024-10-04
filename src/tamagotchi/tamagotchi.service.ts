@@ -414,11 +414,15 @@ export class TamagotchiService {
   }
 
   async levelProgress(id: number): Promise<any> {
-    const { created_at } = await this.tamagotchiRepository.findOne({
+    const tamagotchi = await this.tamagotchiRepository.findOne({
       where: { id },
     });
 
-    const createdAt = new Date(created_at);
+    if (!tamagotchi) {
+      throw new ApiError('TAMAGOTCHI-0000');
+    }
+
+    const createdAt = new Date(tamagotchi.created_at);
     console.log(createdAt);
     const now = new Date();
 
