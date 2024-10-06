@@ -18,10 +18,13 @@ export class TamagotchiStatusSickInterceptor implements NestInterceptor {
     next: CallHandler,
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
-    const { userId } = request.body; // 사용자 ID를 요청에서 가져옴
 
+    console.log('아이디', request.params.id);
     // 다마고치 상태 확인
-    const tamagotchi = await this.tamagotchiService.findOne(userId);
+    const tamagotchi = await this.tamagotchiService.findOneByTamagotchiId(
+      request.params.id,
+    );
+    console.log('타마고치 정보', tamagotchi);
     if (tamagotchi.health_status !== HealthStatusType.SICK) {
       throw new ApiError('TAMAGOTCHI-0003');
     }

@@ -181,6 +181,14 @@ export class TamagotchiService {
       relations: ['experience'],
     });
   }
+  async findOneByTamagotchiId(
+    tamagotchiId: number,
+  ): Promise<Tamagotchi | null> {
+    return this.tamagotchiRepository.findOne({
+      where: { id: tamagotchiId },
+      relations: ['experience'],
+    });
+  }
 
   async feed(id: number): Promise<Tamagotchi> {
     // 이미 존재하는 Tamagotchi 엔티티 가져오기
