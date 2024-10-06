@@ -36,7 +36,7 @@ export class Tamagotchi {
   nickname: string;
 
   @Column({ type: 'int', nullable: false })
-  @Max(9)
+  @Max(10)
   happiness: number;
 
   @Column({ type: 'timestamp', nullable: false })
@@ -46,7 +46,7 @@ export class Tamagotchi {
   sick_at: Date | null;
 
   @Column({ type: 'int', nullable: false })
-  @Max(9)
+  @Max(10)
   hunger: number;
 
   @OneToOne(() => Experience, (experience) => experience.id, { cascade: true })
