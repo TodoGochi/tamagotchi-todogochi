@@ -5,6 +5,7 @@ import {
   Param,
   Post,
   UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { TamagotchiService } from './tamagotchi.service';
 import { CreateTamagotchiDto } from './dto/create-Tamagotchi.dto';
@@ -15,6 +16,7 @@ import { LevelUpInterceptor } from 'src/interceptors/level-up.interceptor';
 import { TamagotchiParamDto } from './dto/tamagotchi-param.dto';
 
 @Controller('tamagotchi')
+@UseInterceptors(ClassSerializerInterceptor)
 export class TamagotchiController {
   constructor(private readonly tamagotchiService: TamagotchiService) {}
 

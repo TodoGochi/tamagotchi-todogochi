@@ -11,6 +11,9 @@ import { Exclude } from 'class-transformer';
 @Entity('experience')
 export class Experience {
   @PrimaryGeneratedColumn()
+  @Exclude({
+    toPlainOnly: true,
+  })
   id: number; // 자동 증가 기본 키
 
   @OneToOne(() => Tamagotchi)

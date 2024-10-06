@@ -5,6 +5,7 @@ import { HttpExceptionFilter } from './common/core/filters/http-exception.filter
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Config } from './common/environment/config';
 import { TamagotchiModule } from './tamagotchi/tamagotchi.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TamagotchiModule } from './tamagotchi/tamagotchi.module';
       synchronize: true,
     }),
     TamagotchiModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [

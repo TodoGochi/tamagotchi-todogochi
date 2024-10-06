@@ -13,7 +13,10 @@ import { Tamagotchi } from 'src/tamagotchi/entity/tamagotchi.entity';
 export class LevelUpInterceptor implements NestInterceptor {
   constructor(private readonly tamagotchiService: TamagotchiService) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
     return next.handle().pipe(
       mergeMap(async (data: any) => {
         // data가 Tamagotchi 타입인지 확인
@@ -23,10 +26,11 @@ export class LevelUpInterceptor implements NestInterceptor {
 
           // 다음 레벨 결정
           const nextLevel = this.tamagotchiService.getNextLevel(tamagotchi);
-
           // 레벨 업이 필요한 경우에만 수행
           if (nextLevel !== tamagotchi.level) {
-            await this.tamagotchiService.levelUp(tamagotchi.user_id, nextLevel);
+            await this.tamagotchiService.levelUp(tamagotchi.id, nextLevel);
+            console.log('레벨업 업데이트 완료');
+            return await this.tamagotchiService.findOne(data.user_id);
           }
         }
 
