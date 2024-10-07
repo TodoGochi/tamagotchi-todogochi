@@ -363,8 +363,7 @@ export class TamagotchiService {
     return tamagotchi;
   }
 
-  async play(userId: number, id: number): Promise<any> {
-    // Tamagotchi 엔티티 가져오기 (experience 관계 포함)
+  async play(id: number): Promise<any> {
     const tamagotchi = await this.tamagotchiRepository.findOne({
       where: { id },
       relations: ['experience'],
@@ -381,8 +380,6 @@ export class TamagotchiService {
       throw new ApiError('TAMAGOTCHI-0001'); // Experience가 없을 경우 에러 처리 (이 경우는 발생하지 않아야 함)
     }
 
-    console.log(tamagotchi.experience.play);
-
     // 50% 확률로 특정 기능 실행
     const randomValue = Math.random();
     if (randomValue <= 0.5) {
@@ -392,7 +389,7 @@ export class TamagotchiService {
 
       console.log(`50% 확률로 ${changeAmount}코인 획득`);
       const response = await this.userService.post({
-        path: `/user/${userId}/coin-transactions`,
+        path: `/user/${tamagotchi.user_id}/coin-transactions`,
         data: {
           changeAmount,
           description: `Gained ${changeAmount} coin while playing with tamagotchi`,
@@ -414,7 +411,7 @@ export class TamagotchiService {
 
     console.log('꽝');
     const response = await this.userService.get({
-      path: `/user/${userId}`,
+      path: `/user/${tamagotchi.user_id}`,
     });
 
     const { coin } = response.data;

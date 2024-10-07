@@ -59,11 +59,8 @@ export class TamagotchiController {
 
   @Post(':id/play')
   @UseInterceptors(TamagotchiStatusHealthyInterceptor, LevelUpInterceptor)
-  async play(
-    @Body('userId') userId: number,
-    @Param() params: TamagotchiParamDto,
-  ) {
-    return this.tamagotchiService.play(userId, params.id);
+  async play(@Param() params: TamagotchiParamDto) {
+    return this.tamagotchiService.play(params.id);
   }
 
   @Post(':id/restart')
