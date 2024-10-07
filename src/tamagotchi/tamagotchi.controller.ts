@@ -73,4 +73,9 @@ export class TamagotchiController {
   async levelProgress(@Param() params: TamagotchiParamDto) {
     return this.tamagotchiService.levelProgress(params.id);
   }
+
+  @Get(':id/statusbytamagotchi')
+  async statusByTamagotchiId(@Param() params: TamagotchiParamDto) {
+    return this.tamagotchiService.findOneByTamagotchiId(params.id);
+  }
 }
