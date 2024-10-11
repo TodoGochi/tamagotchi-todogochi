@@ -8,7 +8,7 @@ import { Interval } from '@nestjs/schedule';
 import { HealthStatusType as HealthStatus } from 'src/tamagotchi/constant/health-status.enum';
 import { LevelType } from './constant/level.enum';
 import { UserService as UserServer } from 'src/provider/server/services/user.service';
-
+import { rewardComment } from 'src/common/constants/reward-comments';
 @Injectable()
 export class TamagotchiService {
   constructor(
@@ -392,7 +392,7 @@ export class TamagotchiService {
         path: `/user/${tamagotchi.user_id}/coin-transactions`,
         data: {
           changeAmount,
-          description: `Gained ${changeAmount} coin while playing with tamagotchi`,
+          description: `${rewardComment.play}`,
         },
       });
 
