@@ -380,14 +380,14 @@ export class TamagotchiService {
       throw new ApiError('TAMAGOTCHI-0001'); // Experience가 없을 경우 에러 처리 (이 경우는 발생하지 않아야 함)
     }
 
-    // 50% 확률로 특정 기능 실행
+    // 30% 확률로 특정 기능 실행
     const randomValue = Math.random();
-    if (randomValue <= 0.5) {
+    if (randomValue <= 0.3) {
       // 50% 확률로 a 또는 b 실행
       const randomValueForAction = Math.random();
-      const changeAmount = randomValueForAction <= 0.5 ? 2 : 1;
+      const changeAmount = randomValueForAction <= 0.66 ? 1 : 2;
 
-      console.log(`50% 확률로 ${changeAmount}코인 획득`);
+      console.log(`30% 확률로 ${changeAmount}코인 획득`);
       const response = await this.userService.post({
         path: `/user/${tamagotchi.user_id}/coin-transactions`,
         data: {
