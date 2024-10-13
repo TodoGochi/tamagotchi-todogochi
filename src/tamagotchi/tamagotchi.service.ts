@@ -88,6 +88,7 @@ export class TamagotchiService {
   }
 
   // 10분 간격으로 SICK 상태 확인 및 DEAD 상태 업데이트
+  // 1시간
   @Interval(600000) // 10분 = 600000 밀리초
   async updateDeadStatus(): Promise<void> {
     const currentTime = new Date();
