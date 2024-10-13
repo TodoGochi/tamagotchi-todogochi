@@ -35,7 +35,7 @@ export class TamagotchiService {
 
       // Tamagotchi 엔티티 업데이트
       await this.tamagotchiRepository.update(
-        { user_id: tamagotchi.user_id },
+        { id: tamagotchi.id },
         { happiness: updatedHappiness },
       );
     }
@@ -76,7 +76,7 @@ export class TamagotchiService {
 
       // Tamagotchi 엔티티 업데이트
       await this.tamagotchiRepository.update(
-        { user_id: tamagotchi.user_id },
+        { id: tamagotchi.id },
         {
           hunger: updatedHunger,
           health_status: updatedHealthStatus,
@@ -85,6 +85,37 @@ export class TamagotchiService {
       );
     }
     console.log('hunger 업데이트 완료');
+  }
+
+  // 10분 간격으로 SICK 상태 확인 및 DEAD 상태 업데이트
+  @Interval(600000) // 10분 = 600000 밀리초
+  async updateDeadStatus(): Promise<void> {
+    const currentTime = new Date();
+
+    const tamagotchis = await this.tamagotchiRepository.find({
+      where: { health_status: HealthStatus.SICK },
+    });
+
+    for (const tamagotchi of tamagotchis) {
+      if (tamagotchi.sick_at) {
+        const hoursDifference =
+          (currentTime.getTime() - tamagotchi.sick_at.getTime()) /
+          (1000 * 60 * 60); // 시간 차이 계산
+
+        if (hoursDifference >= 10) {
+          // DEAD 상태로 업데이트
+          await this.tamagotchiRepository.update(
+            { id: tamagotchi.id }, // user_id 대신 id 사용
+            { health_status: HealthStatus.DEAD },
+          );
+          console.log(
+            `ID ${tamagotchi.id}의 Tamagotchi가 DEAD 상태로 변경되었습니다.`,
+          );
+        }
+      }
+    }
+
+    console.log('Sick 상태 확인 및 DEAD 상태 업데이트 완료');
   }
 
   getNextLevel(tamagotchi: Tamagotchi): LevelType {
