@@ -125,15 +125,25 @@ export class TamagotchiService {
   getNextLevel(tamagotchi: Tamagotchi): LevelType {
     const currentLevel = tamagotchi.level;
 
-    // 1레벨에서 2레벨로: 생성 후 2일이 지나면 자동 업그레이드
     if (currentLevel === LevelType.EGG) {
       const currentTime = new Date();
       const createdAt = new Date(tamagotchi.created_at);
-      const daysDifference =
-        (currentTime.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+      // 1레벨에서 2레벨로: 생성 후 2일이 지나면 자동 업그레이드
+      // const daysDifference =
+      //   (currentTime.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
 
-      if (daysDifference >= 2) {
-        console.log('2일 지남');
+      // if (daysDifference >= 2) {
+      //   console.log('2일 지남');
+      //   return LevelType.BABY;
+      // }
+
+      //1분뒤 레벨업
+      const secondsDifference =
+        (currentTime.getTime() - createdAt.getTime()) / 1000;
+
+      // 1분(60초) 경과 시 레벨 업
+      if (secondsDifference >= 60) {
+        console.log('1분 경과');
         return LevelType.BABY;
       }
     }
