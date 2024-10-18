@@ -485,7 +485,9 @@ export class TamagotchiService {
     const now = new Date();
 
     // 48시간을 밀리초로 변환 (48시간 * 60분 * 60초 * 1000밀리초)
-    const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
+    // const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
+
+    const fortyEightHoursInMs = 60 * 1000;
 
     // 48시간에서 경과한 시간을 빼서 남은 시간 계산
     const elapsedMs = now.getTime() - createdAt.getTime();
