@@ -534,18 +534,19 @@ export class TamagotchiService {
       where: { tamagotchi: { id: tamagotchiId }, level },
     });
 
+    console.log('테스트', existingEffect);
+
     if (existingEffect && existingEffect.effectApplied) {
       throw new ApiError('TAMAGOTCHI-0007');
     }
 
-    // 3. 중복되지 않은 경우 레벨 효과 생성 및 저장
-    const levelEffect = this.levelEffectRepository.create({
-      tamagotchi,
-      level,
-      effectApplied: true,
-    });
-
-    await this.levelEffectRepository.save(levelEffect);
+    if (existingEffect) {
+      // 기존 객체의 effectApplied 값 업데이트
+      existingEffect.effectApplied = true;
+      await this.levelEffectRepository.save(existingEffect);
+    } else {
+      throw new ApiError('TAMAGOTCHI-0008');
+    }
 
     // 4. Tamagotchi와 레벨 효과 포함한 상태 반환
     const updatedTamagotchi = await this.tamagotchiRepository.findOne({

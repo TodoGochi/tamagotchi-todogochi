@@ -46,4 +46,9 @@ export const ERRORS = {
     message: 'LevelUp Effect already applied',
     statusCode: HttpStatusCode.Forbidden,
   },
+  'TAMAGOTCHI-0008': {
+    errorCode: 'TAMAGOTCHI-0008',
+    message: 'Not Valid Level',
+    statusCode: HttpStatusCode.Forbidden,
+  },
 };
