@@ -41,4 +41,9 @@ export const ERRORS = {
     message: 'User already has a tamagotchi',
     statusCode: HttpStatusCode.Forbidden,
   },
+  'TAMAGOTCHI-0007': {
+    errorCode: 'TAMAGOTCHI-0007',
+    message: 'LevelUp Effect already applied',
+    statusCode: HttpStatusCode.Forbidden,
+  },
 };

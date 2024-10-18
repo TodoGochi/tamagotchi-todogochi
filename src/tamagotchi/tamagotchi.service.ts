@@ -9,6 +9,7 @@ import { HealthStatusType as HealthStatus } from 'src/tamagotchi/constant/health
 import { LevelType } from './constant/level.enum';
 import { UserService as UserServer } from 'src/provider/server/services/user.service';
 import { rewardComment } from 'src/common/constants/reward-comments';
+import { LevelEffect } from './entity/level-effect.entity';
 @Injectable()
 export class TamagotchiService {
   constructor(
@@ -16,6 +17,8 @@ export class TamagotchiService {
     private readonly tamagotchiRepository: Repository<Tamagotchi>,
     @InjectRepository(Experience)
     private readonly experienceRepository: Repository<Experience>,
+    @InjectRepository(LevelEffect)
+    private readonly levelEffectRepository: Repository<LevelEffect>,
     private readonly dataSource: DataSource,
     private readonly userService: UserServer,
   ) {}
@@ -210,7 +213,7 @@ export class TamagotchiService {
   async findOne(userId: number): Promise<Tamagotchi | null> {
     return this.tamagotchiRepository.findOne({
       where: { user_id: userId },
-      relations: ['experience'],
+      relations: ['experience', 'levelEffects'],
     });
   }
   async findOneByTamagotchiId(
@@ -495,5 +498,39 @@ export class TamagotchiService {
       hour: remainedHours,
       min: remainedMinutes,
     };
+  }
+
+  async levelUpEffect(tamagotchiId: number, level: number) {
+    const tamagotchi = await this.tamagotchiRepository.findOneBy({
+      id: tamagotchiId,
+    });
+    if (!tamagotchi) {
+      throw new ApiError('TAMAGOTCHI-0000');
+    }
+
+    const existingEffect = await this.levelEffectRepository.findOne({
+      where: { tamagotchi: { id: tamagotchiId }, level },
+    });
+
+    if (existingEffect) {
+      throw new ApiError('TAMAGOTCHI-0007');
+    }
+
+    // 3. 중복되지 않은 경우 레벨 효과 생성 및 저장
+    const levelEffect = this.levelEffectRepository.create({
+      tamagotchi,
+      level,
+      effectApplied: true,
+    });
+
+    await this.levelEffectRepository.save(levelEffect);
+
+    // 4. Tamagotchi와 레벨 효과 포함한 상태 반환
+    const updatedTamagotchi = await this.tamagotchiRepository.findOne({
+      where: { id: tamagotchiId },
+      relations: ['levelEffects'], // 레벨 효과 포함
+    });
+
+    return updatedTamagotchi;
   }
 }

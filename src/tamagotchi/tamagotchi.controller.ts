@@ -78,4 +78,9 @@ export class TamagotchiController {
   async statusByTamagotchiId(@Param() params: TamagotchiParamDto) {
     return this.tamagotchiService.findOneByTamagotchiId(params.id);
   }
+
+  @Post(':id/levelupeffect/:level')
+  async levelUpEffect(@Param() params) {
+    return this.tamagotchiService.levelUpEffect(params.id, params.level);
+  }
 }

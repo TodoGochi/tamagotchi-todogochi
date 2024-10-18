@@ -4,11 +4,13 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { LevelType as Level } from '../constant/level.enum';
 import { HealthStatusType as HealthStatus } from '../constant/health-status.enum';
 import { Experience } from './experience.entity';
 import { Max } from 'class-validator';
+import { LevelEffect } from './level-effect.entity';
 
 @Entity('tamagotchi')
 export class Tamagotchi {
@@ -52,4 +54,9 @@ export class Tamagotchi {
   @OneToOne(() => Experience, (experience) => experience.id, { cascade: true })
   @JoinColumn()
   experience: Experience; // 외래 키 관계 정의
+
+  @OneToMany(() => LevelEffect, (levelEffect) => levelEffect.tamagotchi, {
+    cascade: true,
+  })
+  levelEffects: LevelEffect[];
 }
