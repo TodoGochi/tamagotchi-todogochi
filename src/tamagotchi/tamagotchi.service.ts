@@ -204,6 +204,14 @@ export class TamagotchiService {
       // Experience 엔티티를 먼저 저장
       const savedExperience = await manager.save(Experience, experience);
 
+      // 3. LevelEffect 엔티티 두 개 생성 (1레벨, 2레벨)
+      const levelEffects = Array.from({ length: 2 }, (_, i) => {
+        const levelEffect = new LevelEffect();
+        levelEffect.level = i + 1; // 레벨 1, 2
+        levelEffect.effectApplied = false;
+        return levelEffect;
+      });
+
       const tamagotchiData: Partial<Tamagotchi> = {
         user_id: input.userId,
         nickname: input.nickname,
@@ -211,6 +219,7 @@ export class TamagotchiService {
         created_at: new Date(),
         hunger: 10,
         experience: savedExperience, // 저장된 experience 할당
+        levelEffects: levelEffects,
       };
 
       // Tamagotchi 생성 및 저장
