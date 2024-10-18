@@ -533,7 +533,7 @@ export class TamagotchiService {
       where: { tamagotchi: { id: tamagotchiId }, level },
     });
 
-    if (existingEffect) {
+    if (existingEffect && existingEffect.effectApplied) {
       throw new ApiError('TAMAGOTCHI-0007');
     }
 
