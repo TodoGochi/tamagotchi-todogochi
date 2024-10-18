@@ -141,8 +141,8 @@ export class TamagotchiService {
       const secondsDifference =
         (currentTime.getTime() - createdAt.getTime()) / 1000;
 
-      // 1분(60초) 경과 시 레벨 업
-      if (secondsDifference >= 60) {
+      // 3분(180초) 경과 시 레벨 업
+      if (secondsDifference >= 180) {
         console.log('1분 경과');
         return LevelType.BABY;
       }
