@@ -486,19 +486,17 @@ export class TamagotchiService {
     });
 
     if (!tamagotchi) {
-      throw new ApiError('TAMAGOTCHI-0000');
+      throw new ApiError('TAMAGOTCHI-0000'); // 타마고치가 없을 때 에러
     }
 
     const createdAt = new Date(tamagotchi.created_at);
     console.log(createdAt);
     const now = new Date();
 
-    // 48시간을 밀리초로 변환 (48시간 * 60분 * 60초 * 1000밀리초)
-    // const fortyEightHoursInMs = 48 * 60 * 60 * 1000;
-
+    // 48시간을 밀리초로 변환 (현재 테스트 용도로 3분 설정)
     const fortyEightHoursInMs = 60 * 1000 * 3;
 
-    // 48시간에서 경과한 시간을 빼서 남은 시간 계산
+    // 경과한 시간 계산
     const elapsedMs = now.getTime() - createdAt.getTime();
     const remainedMs = fortyEightHoursInMs - elapsedMs;
 
@@ -506,18 +504,21 @@ export class TamagotchiService {
       return {
         hour: 0,
         min: 0,
+        sec: 0,
       };
     }
 
-    // 남은 시간을 시간과 분으로 변환
+    // 남은 시간, 분, 초 계산
     const remainedHours = Math.floor(remainedMs / (60 * 60 * 1000));
     const remainedMinutes = Math.floor(
       (remainedMs % (60 * 60 * 1000)) / (60 * 1000),
     );
+    const remainedSeconds = Math.floor((remainedMs % (60 * 1000)) / 1000);
 
     return {
       hour: remainedHours,
       min: remainedMinutes,
+      sec: remainedSeconds,
     };
   }
 
