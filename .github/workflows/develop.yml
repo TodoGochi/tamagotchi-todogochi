@@ -1,25 +1,29 @@
 name: API Production
+
 on:
   push:
     branches:
-      - development
+      - dev
+
 jobs:
   Deploy:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Deploy via SSH
         env:
-          PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
-          HOSTNAME: ${{ secrets.AWS_HOSTNAME }}
+          PRIVATE_KEY_BASE64: ${{ secrets.AWS_PRIVATE_KEY_NEW }}
+          HOSTNAME: ${{ secrets.AWS_HOSTNAME_NEW }}
           USER_NAME: 'ubuntu'
         run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          echo "$PRIVATE_KEY_BASE64" | base64 -d > private_key
+          chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
             cd tamagotchi-todogochi
-            git pull origin development
-            npm install &&
-            npm run build &&
+            git pull origin dev
+            npm install
+            npm run build
             pm2 restart ecosystem.config.js
           '
